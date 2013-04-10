@@ -19,9 +19,13 @@ Installation instruction
 
 Copy the configuration file into `/usr/local/etc/snapbak.conf` and the script
 into `/usr/local/sbin/snapbak.sh` Edit the configuration file and change the
-mount point `BAKMNT`, the list of VMs to backup from the default `(vm1 vm2)`
-and set `VG` to the volume group the VMs are in. By default the latter is the
-same as the short host name.
+mount point `BAKMNT` - do not forget to add a line in /etc/fstab for this, e.g.
+
+    /dev/sdb1 /mnt/hdd-usb ext3 noauto,defaults 0 0
+
+Also change the list of VMs to backup from the default `(vm1 vm2)` and set `VG`
+to the volume group the VMs are in. By default the latter is the same as the
+short host name.
 
 Depending on how much activity there is on you VMs during the backup, you may
 want to adjust the size of snapshots. This is a percentage of each VM size as
