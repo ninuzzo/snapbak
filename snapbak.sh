@@ -27,7 +27,7 @@ create_snapshot() {
     # Compute the snapshot LV size in megabytes (m) as a percentage of the VM virtual disk size.
     lvsize=$(echo "$(lvs --noheadings --units m -o lv_size "$lvpath" | sed 's/m$//') * $SNAPSIZE / 100" | bc -l)
 
-  lvcreate -s -n "$SNAPNAME" -L ${lvsize}m "$lvpath" &&
+  lvcreate -s -n "$SNAPNAME" -L ${lvsize}m "$lvpath" >/dev/null &&
 
   # Expose the partitions within the snapshot.
   kpartx -a "$SNAPVOL" &&
@@ -49,7 +49,7 @@ update_backup() {
   local destdir="$BAKMNT/$1/"
 
   # Make sure the destination dir exists
-  mkdir "$destdir" &&
+  mkdir -p "$destdir" &&
 
   rsync -aq --delete "$SNAPMNT/" "$BAKMNT/$1/"
 }
@@ -59,9 +59,10 @@ SNAPMNT=$(mktemp -d)
 
 # Online VM backup, using LVM snapshots.
 for vm in "${VMS[@]}"; do
-  create_snapshot "$vm" &&
-  update_backup "$vm" &&
-  destroy_snapshot "$vm"
+  create_snapshot "$vm" && {
+    update_backup "$vm"
+    destroy_snapshot "$vm"
+  }
 done
 
 rmdir $SNAPMNT
