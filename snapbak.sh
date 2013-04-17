@@ -40,7 +40,7 @@ create_snapshot() {
 destroy_snapshot() {
   umount "$SNAPMNT" &&
   kpartx -d "$SNAPVOL" &&
-  lvremove -f "$SNAPVOL"
+  lvremove -f "$SNAPVOL" >/dev/null
 }
 
 # Update a VM backup.
