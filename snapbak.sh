@@ -9,7 +9,7 @@ CONF=/usr/local/etc/snapbak.conf
 source $CONF || exit
 
 # Make sure the USB disk is mounted!
-grep "$BAKMNT" /proc/mounts || mount "$BAKMNT" || exit
+grep -q "$BAKMNT" /proc/mounts || mount "$BAKMNT" || exit
 
 # Optional selective host configuration backup.
 [ "$(type -t backup_host_config)" = "function" ] && backup_host_config
