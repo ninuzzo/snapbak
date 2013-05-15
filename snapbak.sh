@@ -39,7 +39,9 @@ create_snapshot() {
 # Unmount and destroy the last created VM snapshot.
 destroy_snapshot() {
   umount "$SNAPMNT" &&
-  kpartx -d "$SNAPVOL" &&
+  # Use "sync mode" so all udev processing is synced with
+  # kpartx as well, else some snapshots removing may fail. 
+  kpartx -s -d "$SNAPVOL" &&
   lvremove -f "$SNAPVOL" >/dev/null
 }
 
