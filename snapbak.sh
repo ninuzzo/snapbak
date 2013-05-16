@@ -30,7 +30,9 @@ create_snapshot() {
   lvcreate -s -n "$SNAPNAME" -L ${lvsize}m "$lvpath" >/dev/null &&
 
   # Expose the partitions within the snapshot.
-  kpartx -a "$SNAPVOL" &&
+  # Use "sync mode" so all udev processing is synced with
+  # kpartx as well, that is return only when partitions are created.
+  kpartx -s -a "$SNAPVOL" &&
 
   # Assume the first partition is the one to backup.
   mount -t auto -o ro "/dev/mapper/$VG-${SNAPNAME}p1" "$SNAPMNT"
@@ -39,9 +41,11 @@ create_snapshot() {
 # Unmount and destroy the last created VM snapshot.
 destroy_snapshot() {
   umount "$SNAPMNT" &&
-  # Use "sync mode" so all udev processing is synced with
-  # kpartx as well, else some snapshots removing may fail. 
-  kpartx -s -d "$SNAPVOL" &&
+  # For some reasons kpartx -d "$SNAPVOL" sometimes fails.
+  # This sequence of dmsetup remove commands always works.
+  dmsetup remove "$VG-${SNAPNAME}p1" &&
+  dmsetup remove "$VG-${SNAPNAME}" &&
+  dmsetup remove "$VG-${SNAPNAME}-cow" &&
   lvremove -f "$SNAPVOL" >/dev/null
 }
 
